@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>IO流中的基础知识 | Hu的个人网站</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="IO流分类： 输入流、输出流 字节流、字符流 IO流四大家族首领字节流 java.io.InputStream 字节输入流 java.io.OutputStream 字节输出流 字符流 java.io.Reader 字符输入流 java.io.Writer 字符输出流 注意： 四大家族的首领都是抽象类。(abstract class) 所有的流都实现了： java.io.Closeable接口，都">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IO流中的基础知识">
+<meta property="og:url" content="http://example.com/2024/03/12/IO/index.html">
+<meta property="og:site_name" content="Hu的个人网站">
+<meta property="og:description" content="IO流分类： 输入流、输出流 字节流、字符流 IO流四大家族首领字节流 java.io.InputStream 字节输入流 java.io.OutputStream 字节输出流 字符流 java.io.Reader 字符输入流 java.io.Writer 字符输出流 注意： 四大家族的首领都是抽象类。(abstract class) 所有的流都实现了： java.io.Closeable接口，都">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps80.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps81.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps82.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps83.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps84.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps85.png">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps86.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps87.jpg">
+<meta property="og:image" content="http://example.com/2024/03/12/IO/wps88.jpg">
+<meta property="article:published_time" content="2024-03-12T15:07:32.539Z">
+<meta property="article:modified_time" content="2024-03-13T07:50:04.238Z">
+<meta property="article:author" content="胡坤平">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/12/IO/wps80.jpg">
+  
+    <link rel="alternate" href="../../../../atom.xml" title="Hu的个人网站" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="../../../../favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  
+    
+<link rel="stylesheet" href="../../../../fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <!-- <h1 id="logo-wrap">
+        <a href="../../../../index.html" id="logo">Hu的个人网站</a>
+      </h1> -->
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars" ><p style="font-size: 20px;">☰</p></span></a>
+        
+          <a class="main-nav-link" href="../../../../archives">主页</a>
+        
+          <a class="main-nav-link" href="../../../../about">关于我</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="../../../../atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-IO" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <!-- <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-12T15:07:32.539Z" itemprop="datePublished">2024-03-12</time>
+</a> -->
+    
+        <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-12T15:07:32.539Z" itemprop="datePublished">2024-03-12</time>
+</a>
+        <!--
+  <div class="article-category">
+    <a class="article-category-link" href="../../../../categories/Java/">Java</a>
+  </div>
+首页文章日期后面不显示分类-->
+    
+    
+  <div class="article-category">
+    <a class="article-category-link" href="../../../../categories/Java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      IO流中的基础知识
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="IO流"><a href="#IO流" class="headerlink" title="IO流"></a><strong>IO</strong>流</h1><p>分类：</p>
+<p>输入流、输出流</p>
+<p>字节流、字符流</p>
+<h2 id="IO流四大家族首领"><a href="#IO流四大家族首领" class="headerlink" title="IO流四大家族首领"></a><strong>IO流四大家族首领</strong></h2><p>字节流</p>
+<p>java.io.InputStream 字节输入流</p>
+<p>java.io.OutputStream 字节输出流</p>
+<p>字符流</p>
+<p>java.io.Reader 字符输入流</p>
+<p>java.io.Writer 字符输出流</p>
+<p>注意：</p>
+<p>四大家族的首领都是抽象类。(abstract class)</p>
+<p>所有的流都实现了：</p>
+<p>java.io.Closeable接口，都是可关闭的，都有 close() 方法。</p>
+<p>流是一个管道，这个是内存和硬盘之间的通道，用完之后一定要关闭，不然会耗费(占用)很多资源。养成好习惯，用完流一定要关闭。</p>
+<p>所有的 输出流 都实现了：</p>
+<p>java.io.Flushable接口，都是可刷新的，都有 flush() 方法。</p>
+<p><em><strong>*养成一个好习惯，输出流在最终输出之后，一定要记得flush( )刷新一下。这个刷新表示将通道&#x2F;管道当中剩余未输出的数据强行输出完（清空管道！）刷新的作用就是清空管道。*</strong></em></p>
+<p>ps：如果没有flush()可能会导致丢失数据.</p>
+<p>在java中只要“类名”以 Stream 结尾的都是字节流。以“ Reader&#x2F;Writer ”结尾的都是字符</p>
+<h2 id="Java要掌握的流（16个）"><a href="#Java要掌握的流（16个）" class="headerlink" title="Java要掌握的流（16个）"></a><strong>Java要掌握的流（16个）</strong></h2><p>****文件专属****：</p>
+<p>java. io. FileInputStream（）</p>
+<p>java. io. FileOutputStream（）</p>
+<p>java.io.FileReader</p>
+<p>java.io.FileWriter</p>
+<p><img src="wps80.jpg" alt="img"> </p>
+<p><img src="wps81.jpg" alt="img"> </p>
+<p>转换流：（将字节流转换成字符流）</p>
+<p>java.io.InputStreamReader</p>
+<p>java.io.OutputStreamWriter</p>
+<p>缓冲流专属：</p>
+<p>java.io.BufferedReader</p>
+<p>java.io.BufferedWriter</p>
+<p><em><strong>*java.io.BufferedInputStream*</strong></em></p>
+<p><em><strong>*java.io.BufferedOutputStream*</strong></em></p>
+<img src="wps82.jpg" alt="img" style="zoom: 25%;" /> 
+
+ 
+
+ 
+
+ 
+
+<p><img src="wps83.jpg" alt="img"> </p>
+<p>数据流专属：</p>
+<p>java.io.DataInputStream</p>
+<p>java.io.DataOutputStream</p>
+<p>标准输出流：</p>
+<p>java.io.PrintWriter</p>
+<p>java. io. PrintStream（）</p>
+<p>对象专属流：</p>
+<p>java.io.ObjectInputStream（对象输入流）</p>
+<p>java.io.ObjectOutputStream（对象输出流）</p>
+<p>字节数组流：</p>
+<p><img src="wps84.jpg" alt="img"> </p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaoyanjun6/article/details/54946762">ByteArrayInputStream、ByteArrayOutputStream</a></p>
+<p>ByteArrayInputStream 可以将字节数组转化为输入流 。<br>ByteArrayOutputStream可以捕获内存缓冲区的数据，转换成字节数组。</p>
+<p>code：</p>
+<p><img src="wps85.png" alt="img"> </p>
+<p>File文件类</p>
+<p>java.io.File</p>
+<p><img src="wps86.jpg" alt="img"> </p>
+<p><img src="wps87.jpg" alt="img"> </p>
+<p><img src="wps88.jpg" alt="img"> </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/12/IO/" data-id="cltpuxamx0005h2nr8rzzg2k8" data-title="IO流中的基础知识" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="../%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">面试题目</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="../../../../categories/Java/">Java</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2024/03/">三月 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 胡坤平<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="../../../../archives" class="mobile-nav-link">主页</a>
+  
+    <a href="../../../../about" class="mobile-nav-link">关于我</a>
+  
+</nav>
+    
+
+
+<script src="../../../../js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="../../../../fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
