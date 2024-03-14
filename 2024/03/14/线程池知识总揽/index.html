@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>线程池知识总揽 | Hu的个人网站</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="基础知识线程池解决的问题在并发环境下，系统不能够确定在任意时刻中，有多少任务需要执行，有多少资源需要投入。这种不确定性将带来以下若干问题：  频繁申请&#x2F;销毁资源和调度资源，将带来额外的消耗，可能会非常巨大。 对资源无限申请缺少抑制手段，易引发系统资源耗尽的风险。 系统无法合理管理内部的资源分布，会降低系统的稳定性。  为解决资源分配这个问题，线程池采用了“池化”（Pooling）思想。池">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程池知识总揽">
+<meta property="og:url" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/index.html">
+<meta property="og:site_name" content="Hu的个人网站">
+<meta property="og:description" content="基础知识线程池解决的问题在并发环境下，系统不能够确定在任意时刻中，有多少任务需要执行，有多少资源需要投入。这种不确定性将带来以下若干问题：  频繁申请&#x2F;销毁资源和调度资源，将带来额外的消耗，可能会非常巨大。 对资源无限申请缺少抑制手段，易引发系统资源耗尽的风险。 系统无法合理管理内部的资源分布，会降低系统的稳定性。  为解决资源分配这个问题，线程池采用了“池化”（Pooling）思想。池">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/77441586f6b312a54264e3fcf5eebe2663494.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/62853fa44bfa47d63143babe3b5a4c6e82532.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/582d1606d57ff99aa0e5f8fc59c7819329028-0412543.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/31bad766983e212431077ca8da92762050214-20240314183947686.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/f4d89c87acf102b45be8ccf3ed83352a9497-0412887.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/725a3db5114d95675f2098c12dc331c3316963.png">
+<meta property="og:image" content="https://p0.meituan.net/travelcube/49d8041f8480aba5ef59079fcc7143b996706.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/9ffb64cc4c64c0cb8d38dac01c89c905178456.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/03268b9dc49bd30bb63064421bb036bf90315.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/9d8dc9cebe59122127460f81a98894bb34085-0414306.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/49527b1bb385f0f43529e57b614f59ae145454.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/90ea093549782945f2c968403fdc39d415386.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/879edb4f06043d76cea27a3ff358cb1d45243.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/e9a363c8577f211577e4962e9110cb0226733.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/1a1746f33bfdcb03da074d8539ebb2f367563.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/56ab763273b2c03b2f1c37db7b150338414771.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/23a44974ff68a08261fb675242b83648181953.png">
+<meta property="og:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/c6caa5be64f39758ada0593b995d65fd25982.png">
+<meta property="article:published_time" content="2024-03-14T09:23:21.495Z">
+<meta property="article:modified_time" content="2024-03-14T11:28:31.146Z">
+<meta property="article:author" content="胡坤平">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/77441586f6b312a54264e3fcf5eebe2663494.png">
+  
+    <link rel="alternate" href="../../../../atom.xml" title="Hu的个人网站" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="../../../../favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  
+    
+<link rel="stylesheet" href="../../../../fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <!-- <h1 id="logo-wrap">
+        <a href="../../../../index.html" id="logo">Hu的个人网站</a>
+      </h1> -->
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars" ><p style="font-size: 20px;">☰</p></span></a>
+        
+          <a class="main-nav-link" href="../../../../archives">主页</a>
+        
+          <a class="main-nav-link" href="../../../../about">关于我</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="../../../../atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-线程池知识总揽" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <!-- <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-14T09:23:21.495Z" itemprop="datePublished">2024-03-14</time>
+</a> -->
+    
+        <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-14T09:23:21.495Z" itemprop="datePublished">2024-03-14</time>
+</a>
+        <!--首页文章日期后面不显示分类-->
+    
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      线程池知识总揽
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="线程池解决的问题"><a href="#线程池解决的问题" class="headerlink" title="线程池解决的问题"></a>线程池解决的问题</h2><p>在并发环境下，系统不能够确定在任意时刻中，有多少任务需要执行，有多少资源需要投入。这种不确定性将带来以下若干问题：</p>
+<ol>
+<li>频繁申请&#x2F;销毁资源和调度资源，将带来额外的消耗，可能会非常巨大。</li>
+<li>对资源无限申请缺少抑制手段，易引发系统资源耗尽的风险。</li>
+<li>系统无法合理管理内部的资源分布，会降低系统的稳定性。</li>
+</ol>
+<p>为解决资源分配这个问题，线程池采用了“池化”（Pooling）思想。池化，顾名思义，是为了最大化收益并最小化风险，而将资源统一在一起管理的一种思想。</p>
+<h2 id="线程池的好处"><a href="#线程池的好处" class="headerlink" title="线程池的好处"></a>线程池的好处</h2><p>使用线程池可以带来一系列好处：</p>
+<ul>
+<li><strong>降低资源消耗</strong>：通过池化技术重复利用已创建的线程，降低线程创建和销毁造成的损耗。</li>
+<li><strong>提高响应速度</strong>：任务到达时，无需等待线程创建即可立即执行。</li>
+<li><strong>提高线程的可管理性</strong>：线程是稀缺资源，如果无限制创建，不仅会消耗系统资源，还会因为线程的不合理分布导致资源调度失衡，降低系统的稳定性。使用线程池可以进行统一的分配、调优和监控。</li>
+<li><strong>提供更多更强大的功能</strong>：线程池具备可拓展性，允许开发人员向其中增加更多的功能。比如延时定时线程池ScheduledThreadPoolExecutor，就允许任务延期执行或定期执行。</li>
+</ul>
+<h2 id="创建线程池方式"><a href="#创建线程池方式" class="headerlink" title="创建线程池方式"></a>创建线程池方式</h2><ol>
+<li>Exectors创建，不推荐</li>
+<li>构造方法创建</li>
+</ol>
+<h2 id="线程池七大参数"><a href="#线程池七大参数" class="headerlink" title="线程池七大参数"></a>线程池七大参数</h2><p>线程池使用面临的核心的问题在于：<strong>线程池的参数并不好配置</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize,</span></span><br><span class="line"><span class="params">                             <span class="type">int</span> maximumPoolSize,</span></span><br><span class="line"><span class="params">                             <span class="type">long</span> keepAliveTime,</span></span><br><span class="line"><span class="params">                             TimeUnit unit,</span></span><br><span class="line"><span class="params">                             BlockingQueue&lt;Runnable&gt; workQueue,</span></span><br><span class="line"><span class="params">                             ThreadFactory threadFactory,</span></span><br><span class="line"><span class="params">                             RejectedExecutionHandler handler)</span> &#123;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-个最重要的参数："><a href="#3-个最重要的参数：" class="headerlink" title="3 个最重要的参数："></a><strong>3</strong> <strong>个最重要的参数：</strong></h3><h4 id="corePoolSize：核心线程数"><a href="#corePoolSize：核心线程数" class="headerlink" title="corePoolSize：核心线程数"></a>corePoolSize：核心线程数</h4><p>线程池维护的最小线程数量，核心线程创建后不会被回收（注意：设置allowCoreThreadTimeout&#x3D;true后，空闲的核心线程超过存活时间也会被回收）。</p>
+<p>大于核心线程数的线程，在空闲时间超过keepAliveTime后会被回收。</p>
+<p>线程池刚创建时，里面没有一个线程，当调用 execute() 方法添加一个任务时，如果正在运行的线程数量小于corePoolSize，则马上创建新线程并运行这个任务。</p>
+<h4 id="maximumPoolSize：最大线程数"><a href="#maximumPoolSize：最大线程数" class="headerlink" title="maximumPoolSize：最大线程数"></a>maximumPoolSize：最大线程数</h4><p>线程池允许创建的最大线程数量。</p>
+<p>当添加一个任务时，核心线程数已满，线程池还没达到最大线程数，并且没有空闲线程，工作队列已满的情况下，创建一个新线程并执行。</p>
+<h4 id="workQueue：工作队列"><a href="#workQueue：工作队列" class="headerlink" title="workQueue：工作队列"></a>workQueue：工作队列</h4><p>存放待执行任务的队列：当提交的任务数超过核心线程数大小后，再提交的任务就存放在工作队列，任务调度时再从队列中取出任务。它仅仅用来存放被execute()方法提交的Runnable任务。工作队列实现了BlockingQueue接口。</p>
+<p>JDK默认的工作队列有五种：</p>
+<p>ArrayBlockingQueue 数组型阻塞队列：数组结构，初始化时传入大小，有界，FIFO，使用一个重入锁，默认使用非公平锁，入队和出队共用一个锁，互斥。<br>LinkedBlockingQueue 链表型阻塞队列：链表结构，默认初始化大小为Integer.MAX_VALUE，有界（近似无解），FIFO，使用两个重入锁分别控制元素的入队和出队，用Condition进行线程间的唤醒和等待。<br>SynchronousQueue 同步队列：容量为0，添加任务必须等待取出任务，这个队列相当于通道，不存储元素。<br>PriorityBlockingQueue 优先阻塞队列：无界，默认采用元素自然顺序升序排列。<br>DelayQueue 延时队列：无界，元素有过期时间，过期的元素才能被取出。</p>
+<h3 id="其余参数"><a href="#其余参数" class="headerlink" title="其余参数"></a>其余参数</h3><h4 id="keepAliveTime：空闲线程存活时间"><a href="#keepAliveTime：空闲线程存活时间" class="headerlink" title="keepAliveTime：空闲线程存活时间"></a>keepAliveTime：空闲线程存活时间</h4><p>当一个可被回收的线程的空闲时间大于keepAliveTime，就会被回收。</p>
+<p>可被回收的线程：</p>
+<p>设置allowCoreThreadTimeout&#x3D;true的核心线程。<br>大于核心线程数的线程（非核心线程）。</p>
+<h4 id="unit：时间单位"><a href="#unit：时间单位" class="headerlink" title="unit：时间单位"></a>unit：时间单位</h4><p>keepAliveTime的时间单位：</p>
+<p>TimeUnit.NANOSECONDS<br>TimeUnit.MICROSECONDS<br>TimeUnit.MILLISECONDS &#x2F;&#x2F; 毫秒<br>TimeUnit.SECONDS<br>TimeUnit.MINUTES<br>TimeUnit.HOURS<br>TimeUnit.DAYS</p>
+<h4 id="threadFactory：线程工厂"><a href="#threadFactory：线程工厂" class="headerlink" title="threadFactory：线程工厂"></a>threadFactory：线程工厂</h4><p>创建线程的工厂，可以设定线程名、线程编号等。</p>
+<h4 id="handler：拒绝策略"><a href="#handler：拒绝策略" class="headerlink" title="handler：拒绝策略"></a>handler：拒绝策略</h4><p>当线程池线程数已满，并且工作队列达到限制，新提交的任务使用拒绝策略处理。可以自定义拒绝策略，拒绝策略需要实现RejectedExecutionHandler接口。</p>
+<p>JDK默认的拒绝策略有四种：</p>
+<p>AbortPolicy：丢弃任务并抛出RejectedExecutionException异常。<br>DiscardPolicy：丢弃任务，但是不抛出异常。可能导致无法发现系统的异常状态。<br>DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提交被拒绝的任务。<br>CallerRunsPolicy：由调用线程处理该任务。</p>
+<h1 id="核心设计与实现"><a href="#核心设计与实现" class="headerlink" title="核心设计与实现"></a>核心设计与实现</h1><h2 id="总体设计"><a href="#总体设计" class="headerlink" title="总体设计"></a>总体设计</h2><p>ThreadPoolExecutor实现的顶层接口是Executor，顶层接口Executor提供了一种思想：将任务提交和任务执行进行解耦。用户无需关注如何创建线程，如何调度线程来执行任务，用户只需提供Runnable对象，将任务的运行逻辑提交到执行器(Executor)中，由Executor框架完成线程的调配和任务的执行部分。ExecutorService接口增加了一些能力：（1）扩充执行任务的能力，补充可以为一个或一批异步任务生成Future的方法；（2）提供了管控线程池的方法，比如停止线程池的运行。AbstractExecutorService则是上层的抽象类，将执行任务的流程串联了起来，保证下层的实现只需关注一个执行任务的方法即可。最下层的实现类ThreadPoolExecutor实现最复杂的运行部分，ThreadPoolExecutor将会一方面维护自身的生命周期，另一方面同时管理线程和任务，使两者良好的结合从而执行并行任务。</p>
+<h2 id="线程池运行流程"><a href="#线程池运行流程" class="headerlink" title="线程池运行流程"></a>线程池运行流程</h2><p>线程池在内部实际上构建了一个<strong>生产者消费者模型</strong>，将线程和任务两者解耦，并不直接关联，从而良好的缓冲任务，复用线程。</p>
+<p><strong>线程池的运行主要分成两部分：任务管理、线程管理。</strong></p>
+<p><img src="77441586f6b312a54264e3fcf5eebe2663494.png" alt="图2 ThreadPoolExecutor运行流程"></p>
+<h3 id="任务管理"><a href="#任务管理" class="headerlink" title="任务管理"></a>任务管理</h3><p>任务管理部分充当生产者的角色，当任务提交后，线程池会判断该任务后续的流转：</p>
+<p>（1）直接申请线程执行该任务；</p>
+<p>（2）缓冲到队列中等待线程执行；</p>
+<p>（3）拒绝该任务。</p>
+<h3 id="线程管理"><a href="#线程管理" class="headerlink" title="线程管理"></a>线程管理</h3><p>线程管理部分是消费者，它们被统一维护在线程池内，根据任务请求进行线程的分配，当线程执行完任务后则会继续获取新的任务去执行，最终当线程获取不到任务的时候，线程就会被回收。</p>
+<h2 id="线程池运行机制"><a href="#线程池运行机制" class="headerlink" title="线程池运行机制"></a>线程池运行机制</h2><p>按照以下三个部分去详细讲解线程池运行机制：</p>
+<ol>
+<li>线程池如何维护自身状态。</li>
+<li>线程池如何管理任务。</li>
+<li>线程池如何管理线程。</li>
+</ol>
+<h3 id="生命周期管理"><a href="#生命周期管理" class="headerlink" title="生命周期管理"></a>生命周期管理</h3><p>线程池运行的状态，并不是用户显式设置的，而是伴随着线程池的运行，由内部来维护。<strong>线程池内部使用一个变量维护两个值：运行状态(runState)和线程数量 (workerCount)。</strong>在具体实现中，线程池将运行状态(runState)、线程数量 (workerCount)两个关键参数的维护放在了一起，如下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">AtomicInteger</span> <span class="variable">ctl</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(ctlOf(RUNNING, <span class="number">0</span>));</span><br></pre></td></tr></table></figure>
+
+<p><code>ctl</code>这个AtomicInteger类型，是对线程池的运行状态和线程池中有效线程的数量进行控制的一个字段， 它同时包含两部分的信息：线程池的运行状态 (runState) 和线程池内有效线程的数量 (workerCount)，高3位保存runState，低29位保存workerCount，两个变量之间互不干扰。</p>
+<p>用一个变量去存储两个值，可避免在做相关决策时，出现不一致的情况，不必为了维护两者的一致，而占用锁资源。通过阅读线程池源代码也可以发现，经常出现要同时判断线程池运行状态和线程数量的情况。线程池也提供了若干方法去供用户获得线程池当前的运行状态、线程个数。这里都使用的是位运算的方式，相比于基本运算，速度也会快很多。</p>
+<p>关于内部封装的获取生命周期状态、获取线程池线程数量的计算方法如以下代码所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">runStateOf</span><span class="params">(<span class="type">int</span> c)</span>     &#123; <span class="keyword">return</span> c &amp; ~CAPACITY; &#125; <span class="comment">//计算当前运行状态</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">workerCountOf</span><span class="params">(<span class="type">int</span> c)</span>  &#123; <span class="keyword">return</span> c &amp; CAPACITY; &#125;  <span class="comment">//计算当前线程数量</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">ctlOf</span><span class="params">(<span class="type">int</span> rs, <span class="type">int</span> wc)</span> &#123; <span class="keyword">return</span> rs | wc; &#125;   <span class="comment">//通过状态和线程数生成ctl</span></span><br></pre></td></tr></table></figure>
+
+<p>ThreadPoolExecutor的运行状态有5种，分别为：</p>
+<p><img src="62853fa44bfa47d63143babe3b5a4c6e82532.png" alt="img"></p>
+<p>其生命周期转换如下入所示：</p>
+<p><img src="582d1606d57ff99aa0e5f8fc59c7819329028-0412543.png" alt="图3 线程池生命周期"></p>
+<h3 id="任务执行机制"><a href="#任务执行机制" class="headerlink" title="任务执行机制"></a>任务执行机制</h3><h4 id="任务调度"><a href="#任务调度" class="headerlink" title="任务调度"></a>任务调度</h4><p>任务调度是线程池的主要入口，当用户提交了一个任务，接下来这个任务将如何执行都是由这个阶段决定的。了解这部分就相当于了解了&#x3D;&#x3D;线程池的核心运行机制&#x3D;&#x3D;。</p>
+<p>首先，所有任务的调度都是由execute方法完成的，这部分完成的工作是：检查现在线程池的运行状态、运行线程数、运行策略，决定接下来执行的流程，是直接申请线程执行，或是缓冲到队列中执行，亦或是直接拒绝该任务。其执行过程如下：</p>
+<ol>
+<li>首先检测线程池运行状态，如果不是RUNNING，则直接拒绝，线程池要保证在RUNNING的状态下执行任务。</li>
+<li>如果workerCount &lt; corePoolSize，则创建并启动一个线程来执行新提交的任务。</li>
+<li>如果workerCount &gt;&#x3D; corePoolSize，且线程池内的阻塞队列未满，则将任务添加到该阻塞队列中。</li>
+<li>如果workerCount &gt;&#x3D; corePoolSize &amp;&amp; workerCount &lt; maximumPoolSize，且线程池内的阻塞队列已满，则创建并启动一个线程来执行新提交的任务。</li>
+<li>如果workerCount &gt;&#x3D; maximumPoolSize，并且线程池内的阻塞队列已满, 则根据拒绝策略来处理该任务, 默认的处理方式是直接抛异常。</li>
+</ol>
+<p><img src="31bad766983e212431077ca8da92762050214-20240314183947686.png" alt="图4 任务调度流程"></p>
+<h4 id="任务缓冲"><a href="#任务缓冲" class="headerlink" title="任务缓冲"></a>任务缓冲</h4><p>任务缓冲模块是线程池能够管理任务的核心部分。线程池的本质是对任务和线程的管理，而做到这一点最关键的思想就是将任务和线程两者解耦，不让两者直接关联，才可以做后续的分配工作。线程池中是以生产者消费者模式，通过一个阻塞队列来实现的。阻塞队列缓存任务，工作线程从阻塞队列中获取任务。</p>
+<p>阻塞队列(BlockingQueue)是一个支持两个附加操作的队列。这两个附加的操作是：在队列为空时，获取元素的线程会等待队列变为非空。当队列满时，存储元素的线程会等待队列可用。阻塞队列常用于生产者和消费者的场景，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器里拿元素。</p>
+<p>下图中展示了线程1往阻塞队列中添加元素，而线程2从阻塞队列中移除元素：</p>
+<p><img src="f4d89c87acf102b45be8ccf3ed83352a9497-0412887.png" alt="图5 阻塞队列"></p>
+<p>使用不同的队列可以实现不一样的任务存取策略。在这里，我们可以再介绍下阻塞队列的成员：</p>
+<p><img src="725a3db5114d95675f2098c12dc331c3316963.png" alt="img"></p>
+<h4 id="任务申请"><a href="#任务申请" class="headerlink" title="任务申请"></a>任务申请</h4><p>由上文的任务分配部分可知，任务的执行有两种可能：</p>
+<ol>
+<li><p>一种是任务直接由新创建的线程执行。</p>
+</li>
+<li><p>另一种是任务进入任务队列，线程从任务队列中获取任务然后执行，执行完任务的空闲线程会再次去从队列中申请任务再去执行。</p>
+</li>
+</ol>
+<p>第一种情况仅出现在线程初始创建的时候，第二种是线程获取任务绝大多数的情况。线程需要从任务缓存模块中不断地取任务执行，帮助线程从阻塞队列中获取任务，实现线程管理模块和任务管理模块之间的通信。这部分策略由getTask方法实现，其执行流程如下图所示：</p>
+<img src="https://p0.meituan.net/travelcube/49d8041f8480aba5ef59079fcc7143b996706.png" alt="图6 获取任务流程图" style="zoom:50%;" />
+
+<p>getTask这部分进行了多次判断，为的是控制线程的数量，使其符合线程池的状态。如果线程池现在不应该持有那么多线程，则会返回null值。工作线程Worker会不断接收新任务去执行，而当工作线程Worker接收不到任务的时候，就会开始被回收。</p>
+<h4 id="任务拒绝"><a href="#任务拒绝" class="headerlink" title="任务拒绝"></a>任务拒绝</h4><p>任务拒绝模块是线程池的保护部分，线程池有一个最大的容量，当线程池的任务缓存队列已满，并且线程池中的线程数目达到maximumPoolSize时，就需要拒绝掉该任务，采取任务拒绝策略，保护线程池。</p>
+<p>拒绝策略是一个接口，其设计如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RejectedExecutionHandler</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">rejectedExecution</span><span class="params">(Runnable r, ThreadPoolExecutor executor)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用户可以通过实现这个接口去定制拒绝策略，也可以选择JDK提供的四种已有拒绝策略，其特点如下：</p>
+<img src="9ffb64cc4c64c0cb8d38dac01c89c905178456.png" alt="img" style="zoom:50%;" />
+
+<h2 id="Worker线程管理"><a href="#Worker线程管理" class="headerlink" title="Worker线程管理"></a>Worker线程管理</h2><h3 id="Worker线程"><a href="#Worker线程" class="headerlink" title="Worker线程"></a>Worker线程</h3><p>线程池为了掌握线程的状态并维护线程的生命周期，设计了线程池内的工作线程Worker。我们来看一下它的部分代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Worker</span> <span class="keyword">extends</span> <span class="title class_">AbstractQueuedSynchronizer</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread thread;<span class="comment">//Worker持有的线程</span></span><br><span class="line">    Runnable firstTask;<span class="comment">//初始化的任务，可以为null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Worker这个工作线程，实现了Runnable接口，并持有一个线程thread，一个初始化的任务firstTask。thread是在调用构造方法时通过ThreadFactory来创建的线程，可以用来执行任务；firstTask用它来保存传入的第一个任务，这个任务可以有也可以为null。</p>
+<ol>
+<li>如果这个值是非空的，那么线程就会在启动初期立即执行这个任务，也就对应核心线程创建时的情况；</li>
+<li>如果这个值是null，那么就需要创建一个线程去执行任务列表（workQueue）中的任务，也就是非核心线程的创建。</li>
+</ol>
+<p>Worker执行任务的模型如下图所示：</p>
+<p><img src="03268b9dc49bd30bb63064421bb036bf90315.png" alt="图7 Worker执行任务"></p>
+<p>线程池需要管理线程的生命周期，需要在线程长时间不运行的时候进行回收。线程池使用一张Hash表去持有线程的引用，这样可以通过添加引用、移除引用这样的操作来控制线程的生命周期。这个时候重要的就是如何判断线程是否在运行。</p>
+<p>Worker是通过继承AQS，使用AQS来实现独占锁这个功能。没有使用可重入锁ReentrantLock，而是使用AQS，为的就是实现不可重入的特性去反应线程现在的执行状态。</p>
+<p>1.lock方法一旦获取了独占锁，表示当前线程正在执行任务中。 </p>
+<p>2.如果正在执行任务，则不应该中断线程。 </p>
+<p>3.如果该线程现在不是独占锁的状态，也就是空闲的状态，说明它没有在处理任务，这时可以对该线程进行中断。 4.线程池在执行shutdown方法或tryTerminate方法时会调用interruptIdleWorkers方法来中断空闲的线程，interruptIdleWorkers方法会使用tryLock方法来判断线程池中的线程是否是空闲状态；如果线程是空闲状态则可以安全回收。</p>
+<p>在线程回收过程中就使用到了这种特性，回收过程如下图所示：</p>
+<p><img src="9d8dc9cebe59122127460f81a98894bb34085-0414306.png"></p>
+<h3 id="Worker线程增加"><a href="#Worker线程增加" class="headerlink" title="Worker线程增加"></a><strong>Worker线程增加</strong></h3><p>增加线程是通过线程池中的addWorker方法，该方法的功能就是增加一个线程，该方法不考虑线程池是在哪个阶段增加的该线程，这个分配线程的策略是在上个步骤完成的，该步骤仅仅完成增加线程，并使它运行，最后返回是否成功这个结果。addWorker方法有两个参数：firstTask、core。firstTask参数用于指定新增的线程执行的第一个任务，该参数可以为空；core参数为true表示在新增线程时会判断当前活动线程数是否少于corePoolSize，false表示新增线程前需要判断当前活动线程数是否少于maximumPoolSize，其执行流程如下图所示：</p>
+<img src="49527b1bb385f0f43529e57b614f59ae145454.png" style="zoom:50%;" />
+
+<h3 id="Worker线程回收"><a href="#Worker线程回收" class="headerlink" title="Worker线程回收"></a><strong>Worker线程回收</strong></h3><p>线程池中线程的销毁依赖JVM自动的回收，线程池做的工作是根据当前线程池的状态维护一定数量的线程引用，防止这部分线程被JVM回收，当线程池决定哪些线程需要回收时，只需要将其引用消除即可。Worker被创建出来后，就会不断地进行轮询，然后获取任务去执行，核心线程可以无限等待获取任务，非核心线程要限时获取任务。当Worker无法获取到任务，也就是获取的任务为空时，循环会结束，Worker会主动消除自身在线程池内的引用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">while</span> (task != <span class="literal">null</span> || (task = getTask()) != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">//执行任务</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  processWorkerExit(w, completedAbruptly);<span class="comment">//获取不到任务时，主动回收自己</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>线程回收的工作是在processWorkerExit方法完成的。</p>
+<p><img src="90ea093549782945f2c968403fdc39d415386.png" alt="图10 线程销毁流程"></p>
+<p>事实上，在这个方法中，将线程引用移出线程池就已经结束了线程销毁的部分。但由于引起线程销毁的可能性有很多，线程池还要判断是什么引发了这次销毁，是否要改变线程池的现阶段状态，是否要根据新状态，重新分配线程。</p>
+<h3 id="Worker线程执行任务"><a href="#Worker线程执行任务" class="headerlink" title="Worker线程执行任务"></a><strong>Worker线程执行任务</strong></h3><p>在Worker类中的run方法调用了runWorker方法来执行任务，runWorker方法的执行过程如下：</p>
+<p>1.while循环不断地通过getTask()方法获取任务。 2.getTask()方法从阻塞队列中取任务。 3.如果线程池正在停止，那么要保证当前线程是中断状态，否则要保证当前线程不是中断状态。 4.执行任务。 5.如果getTask结果为null则跳出循环，执行processWorkerExit()方法，销毁线程。</p>
+<p>执行流程如下图所示：</p>
+<img src="879edb4f06043d76cea27a3ff358cb1d45243.png" style="zoom:80%;" />
+
+<h1 id="问题思考"><a href="#问题思考" class="headerlink" title="问题思考"></a>问题思考</h1><h2 id="业务背景"><a href="#业务背景" class="headerlink" title="业务背景"></a>业务背景</h2><p><strong>场景1：快速响应用户请求</strong></p>
+<p><strong>描述</strong>：用户发起的实时请求，服务追求响应时间。比如说用户要查看一个商品的信息，那么我们需要将商品维度的一系列信息如商品的价格、优惠、库存、图片等等聚合起来，展示给用户。</p>
+<p><strong>分析</strong>：从用户体验角度看，这个结果响应的越快越好，如果一个页面半天都刷不出，用户可能就放弃查看这个商品了。而面向用户的功能聚合通常非常复杂，伴随着调用与调用之间的级联、多级级联等情况，业务开发同学往往会选择使用线程池这种简单的方式，将调用封装成任务并行的执行，缩短总体响应时间。另外，使用线程池也是有考量的，这种场景最重要的就是获取最大的响应速度去满足用户，所以应该不设置队列去缓冲并发任务，调高corePoolSize和maxPoolSize去尽可能创造多的线程快速执行任务。</p>
+<p><img src="e9a363c8577f211577e4962e9110cb0226733.png" alt="图12 并行执行任务提升任务响应速度"></p>
+<p>图12 并行执行任务提升任务响应速度</p>
+<p><strong>场景2：快速处理批量任务</strong></p>
+<p><strong>描述</strong>：离线的大量计算任务，需要快速执行。比如说，统计某个报表，需要计算出全国各个门店中有哪些商品有某种属性，用于后续营销策略的分析，那么我们需要查询全国所有门店中的所有商品，并且记录具有某属性的商品，然后快速生成报表。</p>
+<p><strong>分析</strong>：这种场景需要执行大量的任务，我们也会希望任务执行的越快越好。这种情况下，也应该使用多线程策略，并行计算。但与响应速度优先的场景区别在于，这类场景任务量巨大，并不需要瞬时的完成，而是关注如何使用有限的资源，尽可能在单位时间内处理更多的任务，也就是吞吐量优先的问题。所以应该设置队列去缓冲并发任务，调整合适的corePoolSize去设置处理任务的线程数。在这里，设置的线程数过多可能还会引发线程上下文切换频繁的问题，也会降低处理任务的速度，降低吞吐量。</p>
+<p><img src="1a1746f33bfdcb03da074d8539ebb2f367563.png" alt="图13 并行执行任务提升批量任务执行速度"></p>
+<p><strong>能否不用线程池?</strong></p>
+<p>业务中要使用线程池，而使用不当又会导致故障，那么我们怎样才能更好地使用线程池呢？针对这个问题，我们下面延展几个方向：</p>
+<p><strong>1. 能否不用线程池?</strong></p>
+<p>回到最初的问题，业务使用线程池是为了获取并发性，对于获取并发性，是否可以有什么其他的方案呢替代？我们尝试进行了一些其他方案的调研：</p>
+<p><img src="56ab763273b2c03b2f1c37db7b150338414771.png" alt="img"></p>
+<p>综合考虑，这些新的方案都能在某种情况下提升并行任务的性能，然而本次重点解决的问题是如何更简易、更安全地获得的并发性。另外，Actor模型的应用实际上甚少，只在Scala中使用广泛，协程框架在Java中维护的也不成熟。这三者现阶段都不是足够的易用，也并不能解决业务上现阶段的问题。</p>
+<p><strong>2. 追求参数设置合理性？</strong></p>
+<p>有没有一种计算公式，能够让开发同学很简易地计算出某种场景中的线程池应该是什么参数呢？</p>
+<p>带着这样的疑问，我们调研了业界的一些线程池参数配置方案：</p>
+<img src="23a44974ff68a08261fb675242b83648181953.png" style="zoom:50%;" />
+
+<p>调研了以上业界方案后，我们并没有得出通用的线程池计算方式。并发任务的执行情况和任务类型相关，IO密集型和CPU密集型的任务运行起来的情况差异非常大，但这种占比是较难合理预估的，这导致很难有一个简单有效的通用公式帮我们直接计算出结果。</p>
+<p><strong>3. 线程池参数动态化？</strong></p>
+<p>尽管经过谨慎的评估，仍然不能够保证一次计算出来合适的参数，那么我们是否可以将修改线程池参数的成本降下来，这样至少可以发生故障的时候可以快速调整从而缩短故障恢复的时间呢？基于这个思考，我们是否可以将线程池的参数从代码中迁移到分布式配置中心上，实现线程池参数可动态配置和即时生效，线程池参数动态化前后的参数修改流程对比如下：</p>
+<p><img src="c6caa5be64f39758ada0593b995d65fd25982.png" alt="图16 动态修改线程池参数新旧流程对比"></p>
+<p>图16 动态修改线程池参数新旧流程对比</p>
+<p>基于以上三个方向对比，我们可以看出参数动态化方向简单有效。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/" data-id="cltr5djyw0002sonr8kpubxlv" data-title="线程池知识总揽" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="../../12/IO/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">IO流中的基础知识</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="../../../../categories/Java/">Java</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2024/03/">三月 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 胡坤平<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="../../../../archives" class="mobile-nav-link">主页</a>
+  
+    <a href="../../../../about" class="mobile-nav-link">关于我</a>
+  
+</nav>
+    
+
+
+<script src="../../../../js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="../../../../fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
