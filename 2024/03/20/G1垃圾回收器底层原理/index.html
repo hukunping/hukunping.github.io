@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>G1垃圾回收器底层原理 | Hu的个人网站</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="G1垃圾回收器最大的特点就是将内存划分为一块一块的Regions，并将其划分为E(新生代区)、S(幸存者区)、O(老年区)、H(大对象)区。同时它能支持停顿时间模型，STW的时间可以控制。 回收过程 初始标记：标记从GC Root直接关联的可达对象。同时STW，此时Young GC也在同时进行。 并发标记：与用户线程并发进行，从GC Root开始对堆中所有对象进行可达性分析。发生在Young GC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="G1垃圾回收器底层原理">
+<meta property="og:url" content="http://example.com/2024/03/20/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="Hu的个人网站">
+<meta property="og:description" content="G1垃圾回收器最大的特点就是将内存划分为一块一块的Regions，并将其划分为E(新生代区)、S(幸存者区)、O(老年区)、H(大对象)区。同时它能支持停顿时间模型，STW的时间可以控制。 回收过程 初始标记：标记从GC Root直接关联的可达对象。同时STW，此时Young GC也在同时进行。 并发标记：与用户线程并发进行，从GC Root开始对堆中所有对象进行可达性分析。发生在Young GC">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-20T03:43:55.976Z">
+<meta property="article:modified_time" content="2024-03-20T04:14:31.680Z">
+<meta property="article:author" content="胡坤平">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="../../../../atom.xml" title="Hu的个人网站" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="../../../../favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  
+    
+<link rel="stylesheet" href="../../../../fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <!-- <h1 id="logo-wrap">
+        <a href="../../../../index.html" id="logo">Hu的个人网站</a>
+      </h1> -->
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars" ><p style="font-size: 20px;">☰</p></span></a>
+        
+          <a class="main-nav-link" href="../../../../archives">主页</a>
+        
+          <a class="main-nav-link" href="../../../../about">关于我</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="../../../../atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-G1垃圾回收器底层原理" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <!-- <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-20T03:43:55.976Z" itemprop="datePublished">2024-03-20</time>
+</a> -->
+    
+        <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-20T03:43:55.976Z" itemprop="datePublished">2024-03-20</time>
+</a>
+        <!--首页文章日期后面不显示分类-->
+    
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      G1垃圾回收器底层原理
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>G1垃圾回收器最大的特点就是将内存划分为一块一块的Regions，并将其划分为E(新生代区)、S(幸存者区)、O(老年区)、H(大对象)区。同时它能支持停顿时间模型，STW的时间可以控制。</p>
+<h3 id="回收过程"><a href="#回收过程" class="headerlink" title="回收过程"></a>回收过程</h3><ol>
+<li>初始标记：标记从GC Root<strong>直接关联</strong>的可达对象。同时STW，此时Young GC也在同时进行。</li>
+<li>并发标记：与用户线程并发进行，从GC Root开始<strong>对堆中所有对象</strong>进行可达性分析。发生在Young GC之后。</li>
+<li>最终标记：发生STW，标记在并发标记过程中产生的垃圾。与Mixed GC同时进行。</li>
+<li>筛选回收：制定回收计划，选择多个Region 构成回收集，把回收集中Region的存活对象复制到空的Region中，再清理掉整个旧 Region的全部空间。需要STW。</li>
+</ol>
+<h3 id="GC-Root"><a href="#GC-Root" class="headerlink" title="GC Root"></a>GC Root</h3><p>可达性分析时判断对象是否需要回收的重要方法。GC Root指<strong>程序中的一组对象</strong>，是垃圾回收器用可达性分析时来作为搜索存活对象的起点。</p>
+<p>虚拟机栈（栈帧中的本地变量表）中引用的对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span>  <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">	     <span class="type">Test</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Test</span>();</span><br><span class="line">	     a = <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法区中类静态属性引用的对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Test s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法区中常量引用的对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Test</span> <span class="variable">s</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Test</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本地方法栈中 JNI（即一般说的 Native 方法）引用的对象</p>
+<p>所谓本地方法就是一个 java 调用非 java 代码的接口，该方法并非 Java 实现的，可能由 C 或 Python等其他语言实现的， Java 通过 JNI 来调用本地方法.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 缓存String的class</span></span><br><span class="line">   jclass jc = (*env)-&gt;FindClass(env, STRING_PATH);</span><br></pre></td></tr></table></figure>
+
+<p>如上代码所示，当 java 调用以上本地方法时，jc 会被本地方法栈压入栈中, jc 就是我们说的本地方法栈中 JNI 的对象引用，因此只会在此本地方法执行完成后才会被释放。</p>
+<h3 id="回收模式"><a href="#回收模式" class="headerlink" title="回收模式"></a>回收模式</h3><p>G1垃圾回收器支持两种回收模式，Mixed GC发生在新生代Regions和老年代Regions。</p>
+<h4 id="Young-GC"><a href="#Young-GC" class="headerlink" title="Young GC"></a>Young GC</h4><p>Young GC主要发生在新生代regions。当Jvm启动后，会给新生代分配大约5%的内存空间，比如划分为100块regions，那么有5块是新生代regions。当然会有若干块S0，S1区。</p>
+<p>当新生代内存用完时，发生Young GC，存活的对象复制到S区。多次存活下来的对象经过年龄判断将会进入老年区。</p>
+<p>Young GC的同时还会进行初始标记。结束后开始并发标记。</p>
+<h4 id="Mixed-GC"><a href="#Mixed-GC" class="headerlink" title="Mixed GC"></a>Mixed GC</h4><p>当老年代的内存占到内存的45%时(默认情况下)，会触发一次老年代和新生代的混合回收模式。系统进入STW，同时进入最终标记。通过标记-复制算法将存活的对象放入新的老年代Regions。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/20/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/" data-id="cltzambc10003ivnr7o65c752" data-title="G1垃圾回收器底层原理" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="../../14/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9F%A5%E8%AF%86%E6%80%BB%E6%8F%BD/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">线程池知识总揽</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="../../../../categories/Java/">Java</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2024/03/">三月 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 胡坤平<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="../../../../archives" class="mobile-nav-link">主页</a>
+  
+    <a href="../../../../about" class="mobile-nav-link">关于我</a>
+  
+</nav>
+    
+
+
+<script src="../../../../js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="../../../../fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
