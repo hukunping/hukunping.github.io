@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hu的个人网站</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="title：分布式事务理论知识在电商项目中，如何解决分布式场景下的事务问题？ 举例：下订单预扣款；下订单减库存 首先分析这类食物是哪类事务？是属于柔性事务还是刚性事务。下订单预扣款属于柔性事务，而下订单减库存就属于刚性事务。 CAP理论C：一致性：所有数据节点上的数据都是一致，正确的。 A：可用性：每一个操作总能在一段时间返回结果。 P：分区容忍性：是否可以对数据分区。 强一致性与最终一致性强一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hu的个人网站">
+<meta property="og:url" content="http://example.com/2024/03/23/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="Hu的个人网站">
+<meta property="og:description" content="title：分布式事务理论知识在电商项目中，如何解决分布式场景下的事务问题？ 举例：下订单预扣款；下订单减库存 首先分析这类食物是哪类事务？是属于柔性事务还是刚性事务。下订单预扣款属于柔性事务，而下订单减库存就属于刚性事务。 CAP理论C：一致性：所有数据节点上的数据都是一致，正确的。 A：可用性：每一个操作总能在一段时间返回结果。 P：分区容忍性：是否可以对数据分区。 强一致性与最终一致性强一">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-23T15:21:57.846Z">
+<meta property="article:modified_time" content="2024-03-23T15:34:57.836Z">
+<meta property="article:author" content="胡坤平">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="../../../../atom.xml" title="Hu的个人网站" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="../../../../favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="../../../../css/style.css">
+
+  
+    
+<link rel="stylesheet" href="../../../../fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <!-- <h1 id="logo-wrap">
+        <a href="../../../../index.html" id="logo">Hu的个人网站</a>
+      </h1> -->
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars" ><p style="font-size: 20px;">☰</p></span></a>
+        
+          <a class="main-nav-link" href="../../../../archives">主页</a>
+        
+          <a class="main-nav-link" href="../../../../about">关于我</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="../../../../atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-分布式事务理论知识" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <!-- <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-23T15:21:57.846Z" itemprop="datePublished">2024-03-23</time>
+</a> -->
+    
+        <a href="" class="article-date">
+  <time class="dt-published" datetime="2024-03-23T15:21:57.846Z" itemprop="datePublished">2024-03-23</time>
+</a>
+        <!--首页文章日期后面不显示分类-->
+    
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <hr>
+<h2 id="title：分布式事务理论知识"><a href="#title：分布式事务理论知识" class="headerlink" title="title：分布式事务理论知识"></a>title：分布式事务理论知识</h2><p>在电商项目中，如何解决分布式场景下的事务问题？</p>
+<p>举例：下订单预扣款；下订单减库存</p>
+<p>首先分析这类食物是哪类事务？是属于柔性事务还是刚性事务。下订单预扣款属于柔性事务，而下订单减库存就属于刚性事务。</p>
+<h3 id="CAP理论"><a href="#CAP理论" class="headerlink" title="CAP理论"></a>CAP理论</h3><p>C：一致性：所有数据节点上的数据都是一致，正确的。</p>
+<p>A：可用性：每一个操作总能在一段时间返回结果。</p>
+<p>P：分区容忍性：是否可以对数据分区。</p>
+<h3 id="强一致性与最终一致性"><a href="#强一致性与最终一致性" class="headerlink" title="强一致性与最终一致性"></a>强一致性与最终一致性</h3><p>强一致性：写入值后，下一次读取所有的数据节点都能得到修改后的值。牺牲可用性。</p>
+<p>最终一致性：允许有一段时间各个数据节点的数据不一致，但最终是一致的。</p>
+<h3 id="事务分类"><a href="#事务分类" class="headerlink" title="事务分类"></a>事务分类</h3><ol>
+<li><strong>刚性事务</strong>：满足强一致性的。比如金融系统，电商库存。</li>
+<li><strong>柔性事务</strong>：满足最终一致性。比如下订单预扣款。</li>
+</ol>
+<h3 id="如何实现刚性，柔性事务？"><a href="#如何实现刚性，柔性事务？" class="headerlink" title="如何实现刚性，柔性事务？"></a>如何实现刚性，柔性事务？</h3><ol>
+<li>TCC型事务</li>
+<li>异步确保性（RabbitMQ事务消息）</li>
+<li>最大努力性</li>
+</ol>
+<h3 id="事务解决方案"><a href="#事务解决方案" class="headerlink" title="事务解决方案"></a>事务解决方案</h3><h4 id="满足强一致性"><a href="#满足强一致性" class="headerlink" title="满足强一致性"></a>满足强一致性</h4><h5 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h5><p>二阶段提交，引入一个事务协调者的角色来协调管理各参与者（也可称之为各本地资源）的提交和回滚，二阶段分别指的是准备和提交两个阶段。</p>
+<p><strong>准备阶段</strong>协调者会给各参与者发送准备命令，<strong>准备阶段理解成除了提交事务之外啥事都做完了。</strong></p>
+<p>同步等待所有资源的响应之后就进入第二阶段即提交阶段（注意提交阶段不一定是提交事务，也可能是回滚事务）。</p>
+<p>假如在第一阶段所有参与者都返回准备成功，那么协调者则向所有参与者发送提交事务命令，然后等待所有事务都提交成功之后，返回事务执行成功。</p>
+<p>2PC 是一个<strong>同步阻塞协议</strong>，像第一阶段协调者会等待所有参与者响应才会进行下一步操作，当然第一阶段的<strong>协调者有超时机制</strong>，假设因为网络原因没有收到某参与者的响应或某参与者宕机了，那么超时后就会判断事务失败，向所有参与者发送回滚命令。</p>
+<p>如果协调者是一个单点，那么还可能存在单点故障问题。所以一般落地实现中协调者都是集群。2PC 适用于<strong>数据库层面的分布式事务场景</strong>，而我们业务需求有时候不仅仅关乎数据库，也有可能是上传一张图片或者发送一条短信。</p>
+<p>2PC 是一种<strong>尽量保证强一致性</strong>的分布式事务，因此它是<strong>同步阻塞</strong>的，而同步阻塞就导致长久的资源锁定问题，<strong>总体而言效率低</strong>，并且存在<strong>单点故障</strong>问题，在极端条件下存在<strong>数据不一致</strong>的风险。</p>
+<h5 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h5><p>3PC 包含了三个阶段，分别是<strong>准备阶段、预提交阶段和提交阶段</strong>。</p>
+<p>准备阶段：协调者只是询问参与者的自身状况，在不在线，负载重不重？</p>
+<p>而预提交阶段就是和 2PC 的准备阶段一样，除了事务的提交该做的都做了。提交阶段和 2PC 的一样。</p>
+<p>3PC 的阶段变更有什么影响：&#x3D;&#x3D;首先<strong>准备阶段的变更成不会直接执行事务</strong>，而是会先去询问此时的参与者是否有条件接这个事务，因此<strong>不会一来就干活直接锁资源</strong>，使得在某些资源不可用的情况下所有参与者都阻塞着。&#x3D;&#x3D;</p>
+<p>而<strong>预提交阶段的引入起到了一个统一状态的作用</strong>，它像一道栅栏，表明在预提交阶段前所有参与者其实还未都回应，在预处理阶段表明所有参与者都已经回应了。</p>
+<p>假如你是一位参与者，你知道自己进入了预提交状态那你就可以推断出来其他参与者也都进入了预提交状态。</p>
+<p>&#x3D;&#x3D;但是多引入一个阶段也多一个交互，因此<strong>性能会差一些</strong>，而且<strong>绝大部分的情况下资源应该都是可用的</strong>，这样等于每次明知可用执行还得询问一次。&#x3D;&#x3D;</p>
+<h4 id="补偿性事务思想"><a href="#补偿性事务思想" class="headerlink" title="补偿性事务思想"></a>补偿性事务思想</h4><h5 id="TCC"><a href="#TCC" class="headerlink" title="TCC"></a>TCC</h5><p><strong>2PC 和 3PC 都是数据库层面的，而 TCC 是业务层面的分布式事务</strong>，分布式事务不仅仅包括数据库的操作，还包括发送短信等，<strong>TCC可以跨数据库、跨不同的业务系统来实现事务</strong>。</p>
+<h4 id="满足最终一致性"><a href="#满足最终一致性" class="headerlink" title="满足最终一致性"></a>满足最终一致性</h4><h5 id="本地消息表"><a href="#本地消息表" class="headerlink" title="本地消息表"></a>本地消息表</h5><h5 id="消息事务"><a href="#消息事务" class="headerlink" title="消息事务"></a>消息事务</h5><p>比如Rabbit MQ中的事务消息。</p>
+<h5 id="最大努力通知"><a href="#最大努力通知" class="headerlink" title="最大努力通知"></a>最大努力通知</h5>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/23/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86/" data-id="clu4966790002e2t2b2z5dqzl" data-title="" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="../../20/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">G1垃圾回收器底层原理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="../../../../categories/Java/">Java</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2024/03/">三月 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 胡坤平<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="../../../../archives" class="mobile-nav-link">主页</a>
+  
+    <a href="../../../../about" class="mobile-nav-link">关于我</a>
+  
+</nav>
+    
+
+
+<script src="../../../../js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="../../../../fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="../../../../js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
